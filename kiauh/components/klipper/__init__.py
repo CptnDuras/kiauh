@@ -33,9 +33,9 @@ KLIPPER_BACKUP_DIR = BACKUP_ROOT_DIR.joinpath("klipper-backups")
 KLIPPER_REQ_FILE = KLIPPER_DIR.joinpath("scripts/klippy-requirements.txt")
 
 if platform.freedesktop_os_release().get("ID") == "fedora":
-    KLIPPER_INSTALL_SCRIPT = KLIPPER_DIR.joinpath("scripts/install-ubuntu-22.04.sh")
-else:
     KLIPPER_INSTALL_SCRIPT = KLIPPER_DIR.joinpath("scripts/install-centos.sh")
+else:
+    KLIPPER_INSTALL_SCRIPT = KLIPPER_DIR.joinpath("scripts/install-ubuntu-22.04.sh")
 
 KLIPPER_SERVICE_TEMPLATE = MODULE_PATH.joinpath(f"assets/{KLIPPER_SERVICE_NAME}")
 KLIPPER_ENV_FILE_TEMPLATE = MODULE_PATH.joinpath(f"assets/{KLIPPER_ENV_FILE_NAME}")
