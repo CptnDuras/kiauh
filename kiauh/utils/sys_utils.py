@@ -329,7 +329,7 @@ def install_system_packages(packages: List[str]) -> None:
     """
     try:
         if platform.freedesktop_os_release().get("ID") == "fedora":
-            command = ["sudo", "dnf", "-y", "install"]
+            command = "sudo dnf -y install --skip-unavailable".split(" ")
         else:
             command = ["sudo", "apt-get", "install", "-y"]
         for pkg in packages:
