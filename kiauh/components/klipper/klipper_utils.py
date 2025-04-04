@@ -211,6 +211,7 @@ def install_klipper_packages() -> None:
 
     # Add pkg-config for rp2040 build
     if platform.freedesktop_os_release().get("ID") == "fedora":
+        Logger.print_info(f"Fedora detected, added pkgconf-pkg-config")
         packages.append("pkgconf-pkg-config")
     else:
         packages.append("pkg-config")
