@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import os
+import platform
 import re
 import select
 import shutil
@@ -255,17 +256,19 @@ def update_system_package_lists(silent: bool, rls_info_change=False) -> None:
         Logger.print_status("Updating package list...")
 
     try:
-        command = ["sudo", "apt-get", "update"]
-        if rls_info_change:
-            command.append("--allow-releaseinfo-change")
+        if platform.freedesktop_os_release().get("ID") != "fedora":
+            command = ["sudo", "apt-get", "update"]
 
-        result = run(command, stderr=PIPE, text=True)
-        if result.returncode != 0 or result.stderr:
-            Logger.print_error(f"{result.stderr}", False)
-            Logger.print_error("Updating system package list failed!")
-            return
+            if rls_info_change:
+                command.append("--allow-releaseinfo-change")
 
-        Logger.print_ok("System package list update successful!")
+            result = run(command, stderr=PIPE, text=True)
+            if result.returncode != 0 or result.stderr:
+                Logger.print_error(f"{result.stderr}", False)
+                Logger.print_error("Updating system package list failed!")
+                return
+
+            Logger.print_ok("System package list update successful!")
     except CalledProcessError as e:
         Logger.print_error(f"Error updating system package list:\n{e.stderr.decode()}")
         raise
@@ -277,7 +280,10 @@ def get_upgradable_packages() -> List[str]:
     :return: A list of package names available for upgrade
     """
     try:
-        command = ["apt", "list", "--upgradable"]
+        if platform.freedesktop_os_release().get("ID") == "fedora":
+            command = "sudo dnf check-update".split(" ")
+        else:
+            command = ["apt", "list", "--upgradable"]
         output: str = check_output(command, stderr=DEVNULL, text=True, encoding="utf-8")
         pkglist = []
         for line in output.split("\n"):
@@ -298,7 +304,10 @@ def check_package_install(packages: Set[str]) -> List[str]:
     """
     not_installed = []
     for package in packages:
-        command = ["dpkg-query", "-f'${Status}'", "--show", package]
+        if platform.freedesktop_os_release().get("ID") == "fedora":
+            command = ["sudo", "dnf", "list", "installed", package]
+        else:
+            command = ["dpkg-query", "-f'${Status}'", "--show", package]
         result = run(
             command,
             stdout=PIPE,
@@ -318,7 +327,10 @@ def install_system_packages(packages: List[str]) -> None:
     :return: None
     """
     try:
-        command = ["sudo", "apt-get", "install", "-y"]
+        if platform.freedesktop_os_release().get("ID") == "fedora":
+            command = ["sudo", "dnf", "-y", "install"]
+        else:
+            command = ["sudo", "apt-get", "install", "-y"]
         for pkg in packages:
             command.append(pkg)
         run(command, stderr=PIPE, check=True)
@@ -336,7 +348,10 @@ def upgrade_system_packages(packages: List[str]) -> None:
     :return: None
     """
     try:
-        command = ["sudo", "apt-get", "upgrade", "-y"]
+        if platform.freedesktop_os_release().get("ID") == "fedora":
+            command = "sudo dnf -y update".split(" ")
+        else:
+            command = ["sudo", "apt-get", "upgrade", "-y"]
         for pkg in packages:
             command.append(pkg)
         run(command, stderr=PIPE, check=True)
