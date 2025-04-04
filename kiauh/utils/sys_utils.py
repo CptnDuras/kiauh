@@ -78,6 +78,7 @@ def parse_packages_from_file(source_file: Path) -> List[str]:
     :param source_file: path of the sourcefile to read from
     :return: A list of package names
     """
+    Logger.print_info(f"Getting packages from: {source_file}")
 
     packages = []
     with open(source_file, "r") as file:
