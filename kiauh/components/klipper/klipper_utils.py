@@ -9,7 +9,9 @@
 from __future__ import annotations
 
 import grp
+import logging
 import os
+import platform
 import shutil
 from pathlib import Path
 from subprocess import CalledProcessError, run
@@ -208,7 +210,12 @@ def install_klipper_packages() -> None:
     packages = parse_packages_from_file(script)
 
     # Add pkg-config for rp2040 build
-    packages.append("pkg-config")
+    if platform.freedesktop_os_release().get("ID") == "fedora":
+        packages.append("pkgconf-pkg-config")
+    else:
+        packages.append("pkg-config")
+
+    Logger.print_info(packages)
 
     # Add dbus requirement for DietPi distro
     if check_file_exist(Path("/boot/dietpi/.version")):
@@ -253,4 +260,4 @@ def install_input_shaper_deps() -> None:
 
     py_deps = ("numpy",)
 
-    install_python_packages(KLIPPER_ENV_DIR, {*py_deps})
+    install_python_packages(KLIPPER_ENV_DIR, list({*py_deps}))
